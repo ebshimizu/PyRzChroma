@@ -1,0 +1,38 @@
+cmake_minimum_required (VERSION 2.6)
+
+project (PyRzChroma)
+
+set(RAZER_CHROMA_SDK "" CACHE PATH "Location of the Razer Chroma SDK")
+
+# Set source files
+INCLUDE_DIRECTORIES("${RAZER_CHROMA_SDK}/inc")
+
+set (PYRZCHROMA_SRC
+  ${PROJECT_SOURCE_DIR}/PyRzChroma.h
+  ${RAZER_CHROMA_SDK}/inc/RzChromaSDKTypes.h
+  ${RAZER_CHROMA_SDK}/inc/RzChromaSDKDefines.h
+  ${RAZER_CHROMA_SDK}/inc/RzErrors.h
+  ${PROJECT_SOURCE_DIR}/PyRzChroma.cpp
+)
+
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+add_executable (Test test.cpp ${PYRZCHROMA_SRC})
+
+# Time for fun other library binding generation time
+FIND_PACKAGE(SWIG REQUIRED)
+
+INCLUDE(${SWIG_USE_FILE})
+INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}")
+
+SET(CMAKE_SWIG_FLAGS "")
+
+SET_SOURCE_FILES_PROPERTIES(PyRzChroma.i PROPERTIES CPLUSPLUS ON)
+SET_SOURCE_FILES_PROPERTIES(PyRzChroma.i PROPERTIES SWIG_FLAGS "")
+
+MESSAGE("Including python bindings...")
+FIND_PACKAGE(PythonLibs)
+
+INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+SWIG_ADD_MODULE(PyRzChroma python ${PYRZCHROMA_SRC} PyRzChroma.i)
+SWIG_LINK_LIBRARIES(PyRzChroma ${PYTHON_LIBRARY})
